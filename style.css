@@ -1,0 +1,71 @@
+
+button{
+    width: 90%;
+    height: 40px;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+label{
+    cursor: pointer;
+}
+
+.cell{
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    border: solid 1px rgb(0, 0, 0);
+}
+
+.cell:hover{
+    cursor: pointer;
+/*            background-color: darkblue;
+    color: rgb(255, 255, 255);*/
+}
+
+.mark{
+    background-color: rgb(5, 5, 5);
+    color: rgb(255, 255, 255);
+}
+
+.dead{
+    color: darkgray;
+}
+
+.main{
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.score, table{
+    width: 100%;
+    max-width: 220px;
+    text-align: center;
+    margin: auto;
+}
+
+@media only screen and (max-width: 600px) {
+    .main{
+        flex-direction: column-reverse;
+    }
+
+    .cell{
+        width: 40px;
+        height: 40px;
+        font-size: 1.5em;
+    }
+
+    .cell:hover{
+        text-align: center;
+        border: solid 1px rgb(255, 0, 0);
+        width: 40px;
+        height: 40px;
+        font-size: 1.5em;
+    }
+
+    .score, table{
+        max-width: 440px;
+
+    }
+}
