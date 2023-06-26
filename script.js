@@ -291,6 +291,27 @@
 
     }
 
+    function getTips(){
+
+        const myTips = []
+
+        for(let y=0; y<grid.length; y++){
+            for(let x=0; x<grid[y].length; x++){
+                if(grid[y][x].live){
+                    const T = tips(y,x)
+                    if(T.length > 0){
+                        myTips.push([y,x])
+                    }
+                }
+            }
+        }
+
+        alert(JSON.stringify(myTips))
+        play.tips--
+        print()
+
+    }
+
 
    /* BEGIN */
 
