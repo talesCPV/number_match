@@ -7,6 +7,8 @@
    const play = new Object
        play.score = 0
        play.level = 0
+       play.tips = 0
+       play.lines = 0
        play.over = false
        play.hiscore = ''
        
@@ -43,7 +45,7 @@
     }
 
 
-   function start(N){
+   function start(N){       
        const num = []
        for(let i=0; i<N; i++){
            num.push(i%9 +1)
@@ -64,12 +66,15 @@
            i++
        }
        play.level++
+       play.tips = Math.floor(N/2)
+       play.lines = 5
        plot()
    }
 
    function print(){
        document.querySelector('#lblScore').innerHTML = 'Score: '+play.score
        document.querySelector('#lblLevel').innerHTML = 'Level: '+play.level
+       document.querySelector('#lblTips').innerHTML = 'Tips: '+play.tips+' - Lines: '+play.lines
    }
 
    function plot(){
@@ -81,22 +86,33 @@
                const td = document.createElement('td')
                td.className = 'cell'
                try{
-                   td.innerHTML = grid[y][x].num
-                   grid[y][x].live ? td.classList.remove('dead') : td.classList.add('dead')
-                   td.addEventListener('click',()=>{
-                       if(!pointer.click){
-                           pointer.click = true
-                           pointer.x = x
-                           pointer.y = y
-                           pointer.cell = td
-                           td.classList.add('mark')
-                       }else{
-                           pointer.click = false
-                           pointer.cell.classList.remove('mark')
-                           tips(y,x)
-                           check(y,x)
-                       }
-                   })
+                    td.innerHTML = grid[y][x].num
+                    grid[y][x].live ? td.classList.remove('dead') : td.classList.add('dead')
+                    td.addEventListener('click',()=>{
+                        if(!play.over){
+                            if(!pointer.click){
+                                pointer.click = true
+                                pointer.x = x
+                                pointer.y = y
+                                pointer.cell = td
+                                td.classList.add('mark')
+                            }else{
+                                pointer.click = false
+                                pointer.cell.classList.remove('mark')
+                                if(y ==  pointer.y && x == pointer.x && play.tips > 0){
+                                    alert(JSON.stringify(tips(y,x)))
+                                    play.tips--
+                                    print()
+                                }
+                                tips(y,x)
+                                check(y,x)
+                            }
+                        }else{
+                            if(confirm('Deseja Iniciar um novo Jogo?')){                                
+                                location.reload()
+                            }
+                        }
+                    })
                }catch{
                    td.innerHTML = ''
                }
@@ -145,9 +161,8 @@
             if(grid.length == 0){
                 alert('Level Complete!')
                 play.score += play.level * 100
-                play.level++
                 print()
-                start(32)
+                start(32+play.level*2)
             }
         } 
 
@@ -169,43 +184,53 @@
     }
    }
 
-
-   function addLine(){
-        playSound('addline.wav')
-
-       const num = []
-
-       for(let y=0; y<grid.length; y++){
-           for(let x=0; x<grid[y].length; x++){
-               grid[y][x].live ? num.push(grid[y][x].num) : 0
-           }
-       }
-       
-       let y = grid.length-1
-
-       for(let i=0; i<num.length; i++){
-           if(grid[y].length >= 9){
-               grid.push([])
-               y++
-           }
-           const obj = new Object
-           obj.num = num[i]
-           obj.live = true
-           grid[y].push(obj)
-       }
-
-       if(grid.length > 12){
-           play.over = true
-           playSound('gameover.wav')
-           alert('GAME OVER!!!')
-           if(play.score >= play.hiscore[0].score){
+    function gameover(){
+        play.over = true
+        playSound('gameover.wav')
+        alert('GAME OVER!!!')
+        if(play.score >= play.hiscore[0].score){
             play.hiscore[0].nome = prompt('Digite Seu Nome:')
             play.hiscore[0].score = play.score
             score(play.hiscore)
-           }
-       }else{
-           plot()
-       }
+        }
+
+    }
+
+
+    function addLine(){
+        if(play.lines > 0){
+            play.lines--
+            playSound('addline.wav')
+            const num = []
+            
+            for(let y=0; y<grid.length; y++){
+                for(let x=0; x<grid[y].length; x++){
+                    grid[y][x].live ? num.push(grid[y][x].num) : 0
+                }
+            }
+            
+            let y = grid.length-1
+            
+            for(let i=0; i<num.length; i++){
+                if(grid[y].length >= 9){
+                    grid.push([])
+                    y++
+                }
+                const obj = new Object
+                obj.num = num[i]
+                obj.live = true
+                grid[y].push(obj)
+            }
+            
+            if(grid.length > 12){
+                gameover()
+            }else{
+                plot()
+            }
+        }else{
+            gameover()
+        }
+
 
    }
 
