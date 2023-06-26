@@ -66,7 +66,7 @@
            i++
        }
        play.level++
-       play.tips = Math.floor(N/2)
+       play.tips = 5
        play.lines = 5
        plot()
    }
@@ -99,13 +99,11 @@
                             }else{
                                 pointer.click = false
                                 pointer.cell.classList.remove('mark')
-                                if(y ==  pointer.y && x == pointer.x && play.tips > 0){
-                                    alert(JSON.stringify(tips(y,x)))
-                                    play.tips--
-                                    print()
-                                }
-                                tips(y,x)
+//                                tips(y,x)
                                 check(y,x)
+                                if(getTips().length == 0){
+                                    addLine()
+                                }
                             }
                         }else{
                             if(confirm('Deseja Iniciar um novo Jogo?')){                                
@@ -291,6 +289,20 @@
 
     }
 
+    function btnTips(){
+    
+        const tips = getTips()
+        
+        if(tips.length > 0 && play.tips > 0){
+            alert(JSON.stringify(tips))
+            play.tips--
+            print()    
+        }
+
+
+
+    }
+
     function getTips(){
 
         const myTips = []
@@ -306,10 +318,7 @@
             }
         }
 
-        alert(JSON.stringify(myTips))
-        play.tips--
-        print()
-
+        return myTips
     }
 
 
