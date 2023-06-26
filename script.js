@@ -93,6 +93,7 @@
                        }else{
                            pointer.click = false
                            pointer.cell.classList.remove('mark')
+                           tips(y,x)
                            check(y,x)
                        }
                    })
@@ -107,24 +108,20 @@
    }
 
    function check(y,x){
-       
-       function match(){
-           return (grid[y][x].num == grid[pointer.y][pointer.x].num || grid[y][x].num + grid[pointer.y][pointer.x].num == 10) && !(pointer.y== y && pointer.x == x) && grid[pointer.y][pointer.x].live && grid[y][x].live
-       }
 
-       function kill(){
-           pointer.cell.classList.add('dead')
-           tbl.childNodes[y].childNodes[x].classList.add('dead')
-           grid[y][x].live = false
-           grid[pointer.y][pointer.x].live = false
-           drop()          
-           play.score += play.level * 3
-           updateScore()
-           print()
-           playSound('kill.wav')
-       }
+        function kill(){
+            pointer.cell.classList.add('dead')
+            tbl.childNodes[y].childNodes[x].classList.add('dead')
+            grid[y][x].live = false
+            grid[pointer.y][pointer.x].live = false
+            drop()          
+            play.score += play.level * 3
+            updateScore()
+            print()
+            playSound('kill.wav')
+        }
 
-       function drop(){
+        function drop(){
 
             
             for(let y_=0; y_<grid.length; y_++){
@@ -142,79 +139,27 @@
             }        
             plot()           
             finish()
-       }
+        }
 
-       function finish(){
-           if(grid.length == 0){
-               alert('Level Complete!')
-               play.score += play.level * 100
-               play.level++
-               print()
-               start(32)
-           }
-       }
+        function finish(){
+            if(grid.length == 0){
+                alert('Level Complete!')
+                play.score += play.level * 100
+                play.level++
+                print()
+                start(32)
+            }
+        } 
 
-       const p1 = grid[pointer.y][pointer.x]
-       const p2 = grid[y][x]
-       let ok = false
-       let kind = []
+        const opt = tips(y,x)
+        for(let i=0; i<opt.length; i++){
+            if(opt[i][0] == pointer.y && opt[i][1] == pointer.x){
+                kill()
+            }
+        }
 
-       pointer.x == x ? kind.push('col') : 0
-       pointer.y == y ? kind.push('line') : 0
-       pointer.y-pointer.x == y-x ? kind.push('dia_d') : 0
-       pointer.y+pointer.x == y+x ? kind.push('dia_e') : 0
-       Math.abs(pointer.y-y)==1 ? kind.push('cross') : 0
-       kind = match() ? kind : []
+        console.log(opt)        
 
-       if(kind.includes('col')){
-           let flag = true
-           for(let i=Math.min(pointer.y,y)+1; i<Math.max(pointer.y,y); i++){
-               flag = grid[i][x].live ? false : flag
-           }
-           ok = flag 
-       }
-
-       if(kind.includes('line')){
-           let flag = true
-           for(let i=Math.min(pointer.x,x)+1; i<Math.max(pointer.x,x); i++){
-               flag = grid[y][i].live ? false : flag
-           }
-           ok = flag 
-       }
-
-       if(kind.includes('dia_d') || kind.includes('dia_e')){
-           let flag = true
-           const x_ = Math.min(x,pointer.x)            
-           const y_ = x == x_ ? y : pointer.y
-           const p_ = kind.includes('dia_d') ? 1 : -1
-           for(let i=1; i<Math.abs(pointer.x-x); i++){
-               flag = grid[y_+i*p_][x_+i].live ? false : flag
-           }
-           ok = flag 
-       }
-
-       if(!ok && kind.includes('cross')){
-           let flag = true
-           let _y = Math.min(y,pointer.y)            
-           let _x = y == _y ? x : pointer.x
-           const y_ = y == _y ? pointer.y : y      
-           const x_ = y == _y ? pointer.x : x
-
-           while(_y != y_ || _x != x_){
-               _x++
-               if(_x >= 9){
-                   _x=0
-                   _y++
-               }
-
-               if(_y != y_ || _x != x_){
-                   flag = grid[_y][_x].live ? false : flag
-               }
-           }
-           ok = flag 
-
-       }
-       ok ? kill() : 0
    }
 
    function playSound(mp3){
@@ -263,6 +208,64 @@
        }
 
    }
+
+    function direct(y,x,_y,_x,out){
+
+        let y_ = y + _y
+        let x_ = x + _x
+        runX()
+        let flag = true
+
+        function match(y_,x_){
+            try{
+                return (grid[y][x].num == grid[y_][x_].num || grid[y][x].num + grid[y_][x_].num == 10) && grid[y_][x_].live
+            }catch{
+                return false
+            }
+        }
+
+        function runX(){
+            if(_y == 0 && _x > 0 && x_ >= grid[y_].length){
+                x_ = 0
+                y_++
+            }else if(_y == 0 && y_ > 0 && _x < 0 && x_ < 0){
+                y_--
+                x_ = grid[y_].length-1
+            }
+
+        }
+
+        while(y_ >= 0 && y_ < grid.length && x_ >= 0 && x_ < grid[y_].length && flag){
+
+            flag =  grid[y_][x_].live ? false : flag
+
+            if(match(y_,x_)){
+                out.push([y_,x_])
+            }
+            x_ = x_ + _x
+            runX()
+            y_ = y_ + _y            
+        }
+    }
+
+
+    function tips(y,x){
+
+        const out = []
+
+        direct(y,x,1,0,out)
+        direct(y,x,-1,0,out)
+        direct(y,x,0,1,out)
+        direct(y,x,0,-1,out)
+        direct(y,x,1,1,out)
+        direct(y,x,1,-1,out)
+        direct(y,x,-1,1,out)
+        direct(y,x,-1,-1,out)
+
+        return out
+
+    }
+
 
    /* BEGIN */
 
